@@ -1,0 +1,10 @@
+^C:\DEV\GAME-ENGINE-F\BUILD\CMAKEFILES\1E7321FEF5AED8FE32CF638970E9AD31\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/Game-Engine-F -BC:/dev/Game-Engine-F/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/dev/Game-Engine-F/build/Game-Engine-F.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

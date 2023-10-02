@@ -1,0 +1,10 @@
+^C:\DEV\GAME-ENGINE-F\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/Game-Engine-F -BC:/dev/Game-Engine-F/build --check-stamp-file C:/dev/Game-Engine-F/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
