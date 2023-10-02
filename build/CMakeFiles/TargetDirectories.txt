@@ -1,3 +1,0 @@
-C:/dev/Game-Engine-F/build/CMakeFiles/Game-Engine-F.dir
-C:/dev/Game-Engine-F/build/CMakeFiles/ALL_BUILD.dir
-C:/dev/Game-Engine-F/build/CMakeFiles/ZERO_CHECK.dir
