@@ -1,17 +1,20 @@
+#include "first_app.hpp"
+
+//std
+#include <cstdlib>
 #include <iostream>
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include <stdexcept>
 
-int main(){
-	std::cout << "HELLOOOO";
+int main() {
+    gef::FirstApp app;
 
+    try {
+        app.run();
 
+    } catch(std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return EXIT_FAILURE;
+    }
 
-
-
-	char c;
-	std::cin >> c;
-
-	return 0;
+    return EXIT_SUCCESS;
 }
-
