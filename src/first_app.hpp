@@ -1,6 +1,8 @@
 #pragma once
 
 #include "gef_window.hpp"
+#include "gef_pipeline.hpp"
+
 namespace gef {
 
 class FirstApp {
@@ -13,6 +15,8 @@ class FirstApp {
 
    private:
     GefWindow gefWindow;
+	GefPipeLine gefPipeLine;
+
 };
 
 }  // namespace gef
