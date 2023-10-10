@@ -1,22 +1,39 @@
 #pragma once
 
+#include <stdint.h>
 #include <string>
 #include <vector>
+#include "gef_device.hpp"
+#include "vulkan/vulkan_core.h"
 
 namespace gef {
+
+struct PipelineConfigInfo {};
 
 class GefPipeLine {
 
    public:
+    GefPipeLine(GefDevice& device, const std::string& vertFilepath, const std::string& fragFilepath,
+                const PipelineConfigInfo& config);
 
-	GefPipeLine(const std::string &vertFilepath, const std::string &fragFilepath);
+	~GefPipeLine();
+
+	GefPipeLine(const GefPipeLine&) = delete;
+	void operator=(const GefPipeLine&) = delete;
+
+	static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
    private:
+    static std::vector<char> readFile(const std::string& filepath);
 
-	static std::vector<char> readFile(const std::string &filepath);
+    void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 
-	void createGraphicsPipeline(const std::string &vertFilepath, const std::string &fragFilepath);
+	void createShaderModule(const std::vector<char> &code, VkShaderModule *shaderModule);
 
+	GefDevice &gefDevice;
+	VkPipeline graphicsPipeline;
+	VkShaderModule vertShaderModule;
+	VkShaderModule fragShaderModule;
 };
 
 }  // namespace gef

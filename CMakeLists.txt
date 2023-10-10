@@ -76,7 +76,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach(GLSL)
 
-message(${SPIRV_BINARY_FILES})
+#message(${SPIRV_BINARY_FILES})
 
 add_custom_target(
     Shaders

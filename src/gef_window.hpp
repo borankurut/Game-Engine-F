@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vulkan/vulkan_core.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <string>
@@ -11,9 +12,11 @@ class GefWindow {
     GefWindow(int w, int h, std::string name);
     ~GefWindow();
     bool shouldClose();
+	void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
     GefWindow(const GefWindow&) = delete;
     GefWindow& operator=(const GefWindow&) = delete;
+
 
    private:
     void initWindow();
