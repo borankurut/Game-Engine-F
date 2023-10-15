@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "vulkan/vulkan_core.h"
+#include "cassert"
 
 namespace gef {
 
@@ -12,10 +13,20 @@ GefPipeLine::GefPipeLine(GefDevice& device, const std::string& vertFilepath, con
                          const PipelineConfigInfo& configInfo)
     : gefDevice{device} {
 
+	assert(configInfo.pipelineLayout != VK_NULL_HANDLE && 
+		"cannot create GefPipeLine because pipelineLayout is not set.");
+
+	assert(configInfo.renderPass != VK_NULL_HANDLE &&
+		"cannot create GefPipeLine because renderPass is not set.");
+	
+
     createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 }
 
-GefPipeLine::~GefPipeLine() { /*todo*/
+GefPipeLine::~GefPipeLine() {
+	vkDestroyShaderModule(gefDevice.device(), vertShaderModule, nullptr);
+	vkDestroyShaderModule(gefDevice.device(), fragShaderModule, nullptr);
+	vkDestroyPipeline(gefDevice.device(), graphicsPipeline, nullptr);
 }
 
 std::vector<char> GefPipeLine::readFile(const std::string& filepath) {
@@ -68,6 +79,30 @@ void GefPipeLine::createGraphicsPipeline(const std::string& vertFilepath, const 
 	vertexInputInfo.pVertexAttributeDescriptions = nullptr;
 	vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+	VkGraphicsPipelineCreateInfo pipeLineInfo{};
+	pipeLineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipeLineInfo.stageCount = 2;
+	pipeLineInfo.pStages = shaderStages;
+	pipeLineInfo.pVertexInputState = &vertexInputInfo;
+	pipeLineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
+	pipeLineInfo.pViewportState = &configInfo.viewportInfo;
+	pipeLineInfo.pRasterizationState = &configInfo.rasterizationInfo;
+	pipeLineInfo.pMultisampleState = &configInfo.multisampleInfo;
+	pipeLineInfo.pColorBlendState = &configInfo.colorBlendInfo;
+	pipeLineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
+	pipeLineInfo.pDynamicState = nullptr;
+
+
+	pipeLineInfo.layout = configInfo.pipelineLayout;
+	pipeLineInfo.renderPass = configInfo.renderPass;
+	pipeLineInfo.subpass = configInfo.subpass;
+
+	pipeLineInfo.basePipelineIndex = -1;
+	pipeLineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	if(vkCreateGraphicsPipelines(gefDevice.device(), VK_NULL_HANDLE, 1, &pipeLineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS){
+		throw std::runtime_error("failed to create graphics pipeline.");
+	}
 }
 
 void GefPipeLine::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
