@@ -9,27 +9,27 @@
 
 namespace gef {
 
-GefPipeLine::GefPipeLine(GefDevice& device, const std::string& vertFilepath, const std::string& fragFilepath,
+GefPipeline::GefPipeline(GefDevice& device, const std::string& vertFilepath, const std::string& fragFilepath,
                          const PipelineConfigInfo& configInfo)
     : gefDevice{device} {
 
 	assert(configInfo.pipelineLayout != VK_NULL_HANDLE && 
-		"cannot create GefPipeLine because pipelineLayout is not set.");
+		"cannot create GefPipeline because pipelineLayout is not set.");
 
 	assert(configInfo.renderPass != VK_NULL_HANDLE &&
-		"cannot create GefPipeLine because renderPass is not set.");
+		"cannot create GefPipeline because renderPass is not set.");
 	
 
     createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
 }
 
-GefPipeLine::~GefPipeLine() {
+GefPipeline::~GefPipeline() {
 	vkDestroyShaderModule(gefDevice.device(), vertShaderModule, nullptr);
 	vkDestroyShaderModule(gefDevice.device(), fragShaderModule, nullptr);
 	vkDestroyPipeline(gefDevice.device(), graphicsPipeline, nullptr);
 }
 
-std::vector<char> GefPipeLine::readFile(const std::string& filepath) {
+std::vector<char> GefPipeline::readFile(const std::string& filepath) {
     std::ifstream file{filepath, std::ios::ate | std::ios::binary};
 
     if(!file.is_open()) {
@@ -47,7 +47,7 @@ std::vector<char> GefPipeLine::readFile(const std::string& filepath) {
     return buffer;
 }
 
-void GefPipeLine::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath,
+void GefPipeline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath,
                                          const PipelineConfigInfo& configInfo) {
     auto vertCode = readFile(vertFilepath);
     auto fragCode = readFile(fragFilepath);
@@ -79,33 +79,41 @@ void GefPipeLine::createGraphicsPipeline(const std::string& vertFilepath, const 
 	vertexInputInfo.pVertexAttributeDescriptions = nullptr;
 	vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
-	VkGraphicsPipelineCreateInfo pipeLineInfo{};
-	pipeLineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipeLineInfo.stageCount = 2;
-	pipeLineInfo.pStages = shaderStages;
-	pipeLineInfo.pVertexInputState = &vertexInputInfo;
-	pipeLineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-	pipeLineInfo.pViewportState = &configInfo.viewportInfo;
-	pipeLineInfo.pRasterizationState = &configInfo.rasterizationInfo;
-	pipeLineInfo.pMultisampleState = &configInfo.multisampleInfo;
-	pipeLineInfo.pColorBlendState = &configInfo.colorBlendInfo;
-	pipeLineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
-	pipeLineInfo.pDynamicState = nullptr;
+
+    VkPipelineViewportStateCreateInfo viewportInfo{};
+    viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportInfo.viewportCount = 1;
+    viewportInfo.pViewports = &configInfo.viewport;
+    viewportInfo.scissorCount = 1;
+    viewportInfo.pScissors = &configInfo.scissor;
+
+	VkGraphicsPipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipelineInfo.stageCount = 2;
+	pipelineInfo.pStages = shaderStages;
+	pipelineInfo.pVertexInputState = &vertexInputInfo;
+	pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
+	pipelineInfo.pViewportState = &viewportInfo;
+	pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
+	pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+	pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
+	pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
+	pipelineInfo.pDynamicState = nullptr;
 
 
-	pipeLineInfo.layout = configInfo.pipelineLayout;
-	pipeLineInfo.renderPass = configInfo.renderPass;
-	pipeLineInfo.subpass = configInfo.subpass;
+	pipelineInfo.layout = configInfo.pipelineLayout;
+	pipelineInfo.renderPass = configInfo.renderPass;
+	pipelineInfo.subpass = configInfo.subpass;
 
-	pipeLineInfo.basePipelineIndex = -1;
-	pipeLineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineInfo.basePipelineIndex = -1;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-	if(vkCreateGraphicsPipelines(gefDevice.device(), VK_NULL_HANDLE, 1, &pipeLineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS){
+	if(vkCreateGraphicsPipelines(gefDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS){
 		throw std::runtime_error("failed to create graphics pipeline.");
 	}
 }
 
-void GefPipeLine::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+void GefPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
@@ -115,7 +123,7 @@ void GefPipeLine::createShaderModule(const std::vector<char>& code, VkShaderModu
     }
 }
 
-PipelineConfigInfo GefPipeLine::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
+PipelineConfigInfo GefPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
     PipelineConfigInfo configInfo{};
 
     configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -131,12 +139,6 @@ PipelineConfigInfo GefPipeLine::defaultPipelineConfigInfo(uint32_t width, uint32
 
     configInfo.scissor.offset = {0, 0};
     configInfo.scissor.extent = {width, height};
-
-    configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    configInfo.viewportInfo.viewportCount = 1;
-    configInfo.viewportInfo.pViewports = &configInfo.viewport;
-    configInfo.viewportInfo.scissorCount = 1;
-    configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
     configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;

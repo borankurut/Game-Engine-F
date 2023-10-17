@@ -11,7 +11,6 @@ namespace gef {
 struct PipelineConfigInfo {
     VkViewport viewport;
     VkRect2D scissor;
-    VkPipelineViewportStateCreateInfo viewportInfo;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
     VkPipelineRasterizationStateCreateInfo rasterizationInfo;
     VkPipelineMultisampleStateCreateInfo multisampleInfo;
@@ -23,16 +22,16 @@ struct PipelineConfigInfo {
     uint32_t subpass = 0;
 };
 
-class GefPipeLine {
+class GefPipeline {
 
    public:
-    GefPipeLine(GefDevice& device, const std::string& vertFilepath, const std::string& fragFilepath,
+    GefPipeline(GefDevice& device, const std::string& vertFilepath, const std::string& fragFilepath,
                 const PipelineConfigInfo& config);
 
-    ~GefPipeLine();
+    ~GefPipeline();
 
-    GefPipeLine(const GefPipeLine&) = delete;
-    void operator=(const GefPipeLine&) = delete;
+    GefPipeline(const GefPipeline&) = delete;
+    void operator=(const GefPipeline&) = delete;
 
     static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 
